@@ -52,6 +52,11 @@ def main():
             enable_env_runner_and_connector_v2=True
         )
         .env_runners(num_env_runners=3)
+        # # For using GPU
+        # .learners(
+        #     num_learners=1,
+        #     num_gpus_per_learner=1
+        # )
         .debugging(logger_creator=custom_logger_creator)
         .training(
             gamma=0.99,            # Discount factor (values near 1 handle delayed sequences better)

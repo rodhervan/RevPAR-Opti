@@ -53,6 +53,13 @@ def evaluate_agent(checkpoint_path: str):
 
     # Using New API Stack natively for inference
     module = algo.get_module("default_policy")
+    
+    # Determine device for inference (default to CPU if model is small or user prefers)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # Actually check if we should even use GPU. For small MLPs, CPU is usually faster.
+    # We will respect the device detection but ensure consistency.
+    module.to(device)
+    print(f"Executing inference on: {device}")
 
     prices = []
     revenues = []
@@ -65,16 +72,16 @@ def evaluate_agent(checkpoint_path: str):
 
     print("\n--- Starting Evaluation Episode ---")
     while not done:
-        # Convert observation to discrete tensor batch [1, obs_size]
-        obs_tensor = torch.tensor(np.array([obs]), dtype=torch.float32)
+        # Convert observation to discrete tensor batch [1, obs_size] and move to GPU
+        obs_tensor = torch.tensor(np.array([obs]), dtype=torch.float32).to(device)
         
         # Native fix for compute_single_action deprecation warning
         with torch.no_grad():
             out = module.forward_inference({"obs": obs_tensor})
             
-        # Extract scalar action from PyTorch output
+        # Extract scalar action from PyTorch output (must bring back to CPU for numpy)
         action_dist = out.get("action_dist_inputs")
-        action = action_dist[0].numpy()
+        action = action_dist[0].cpu().numpy()
         
         obs, reward, terminated, truncated, info = env.step(action)
         
