@@ -210,6 +210,15 @@ __marimo__/
 # --- General System Files ---
 
 .env
+hotelsEnv
+rl_env
 
 # --- Data Files ---
 data/
+Documents/
+
+# --- Scratch folder for local experiments ---
+scratch/
+
+# --- RL Checkpoints ---
+checkpoints_rl/
